@@ -11,7 +11,25 @@ TODO
 ### Syntax DDIC-based CDS View
 
 ```cds
-TODO
+@AbapCatalog.sqlViewName: 'ZMS2IAIRPORT'
+@AbapCatalog.compiler.compareFilter: true
+@AbapCatalog.preserveKey: true
+@AccessControl.authorizationCheck: #NOT_REQUIRED
+@EndUserText.label: 'Airport View - CDS Data Model'
+
+@VDM.viewType: #BASIC
+
+@ObjectModel.representativeKey: 'AirportID'
+
+define view ZMIND2_I_AIRPORT
+  as select from zmind2_airport as Airport
+{
+  key Airport.airport_id as AirportID,
+      Airport.name       as Name,
+      Airport.city       as City,
+      Airport.country    as CountryCode
+}
+
 ```
 
 ### Syntax CDS View Entity
@@ -19,7 +37,26 @@ TODO
 >Ab S/4HANA 2020
 
 ```cds
-TODO
+@AbapCatalog.viewEnhancementCategory: [#NONE]
+@AccessControl.authorizationCheck: #NOT_REQUIRED
+@EndUserText.label: 'Airport Basic View Entity'
+@ObjectModel.usageType:{
+    serviceQuality: #X,
+    sizeCategory: #S,
+    dataClass: #MIXED
+}
+@VDM.viewType: #BASIC
+
+@ObjectModel.representativeKey: 'AirportId'
+
+define view entity ZMIND2E_I_Airport
+  as select from zmind2_airport
+{
+  key airport_id as AirportId,
+      name       as Name,
+      city       as City,
+      country    as CountryCode
+}
 ```
 
 ### Cast Operator
