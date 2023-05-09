@@ -350,7 +350,7 @@ alv->set_view_parameters(
 alv->fullscreen( )->display( ).
 ```
 
-## Annoatationen
+## Annotationen
 
 ### Annotationen Syntax
 
