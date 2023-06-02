@@ -1,3 +1,5 @@
+<img src="https://mindsquare.de/files/logo-mindsquare-176x781.png" alt="mindsquare Logo" title="mindsquare AG" align="right">
+
 # Begleitmaterialien zur Core Data Services (CDS) Schulung
 
 Codebeispiele für die [mindsquare Core Data Services Schulung](https://mindsquare.de/schulungen/)
