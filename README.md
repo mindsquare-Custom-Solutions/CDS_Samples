@@ -13,7 +13,25 @@ TODO
 ### Syntax DDIC-based CDS View
 
 ```cds
-TODO
+@AbapCatalog.sqlViewName: 'ZMS2IAIRPORT'
+@AbapCatalog.compiler.compareFilter: true
+@AbapCatalog.preserveKey: true
+@AccessControl.authorizationCheck: #NOT_REQUIRED
+@EndUserText.label: 'Airport View - CDS Data Model'
+
+@VDM.viewType: #BASIC
+
+@ObjectModel.representativeKey: 'AirportID'
+
+define view ZMIND2_I_AIRPORT
+  as select from zmind2_airport as Airport
+{
+  key Airport.airport_id as AirportID,
+      Airport.name       as Name,
+      Airport.city       as City,
+      Airport.country    as CountryCode
+}
+
 ```
 
 ### Syntax CDS View Entity
@@ -21,7 +39,26 @@ TODO
 >Ab S/4HANA 2020
 
 ```cds
-TODO
+@AbapCatalog.viewEnhancementCategory: [#NONE]
+@AccessControl.authorizationCheck: #NOT_REQUIRED
+@EndUserText.label: 'Airport Basic View Entity'
+@ObjectModel.usageType:{
+    serviceQuality: #X,
+    sizeCategory: #S,
+    dataClass: #MIXED
+}
+@VDM.viewType: #BASIC
+
+@ObjectModel.representativeKey: 'AirportId'
+
+define view entity ZMIND2E_I_Airport
+  as select from zmind2_airport
+{
+  key airport_id as AirportId,
+      name       as Name,
+      city       as City,
+      country    as CountryCode
+}
 ```
 
 ### Cast Operator
@@ -176,11 +213,34 @@ having
 ### Parameter
 
 ```cds
-TODO
+define view entity ZIMIND2_EX_Parameter1
+  with parameters
+    P_Parameter1 :abap.char( 1 ),
+    P_Parameter2 :abap.char( 1 )
+  as select from zmind2_airport
+{
+  key airport_id as AirportId,
+      $parameters.P_Parameter1 as Parameter1,
+      $parameters.P_Parameter2 as Parameter2
+}
 ```
 
 ```cds
-TODO Select einer CDS View mit Parameter
+define view entity ZIMIND2_EX_Parameter2
+  with parameters
+    P_Parameter1 :abap.char( 1 ),
+    P_Parameter2 :abap.char( 1 )
+  as select from ZIMIND2_EX_Parameter1(P_Parameter1:$parameters.P_Parameter1, P_Parameter2: 'E')
+  association [1..1] to ZIMIND2_EX_Parameter1 as _Association on $projection.AirportId = _Association.AirportId
+{
+  key AirportId,
+      Parameter1,
+      Parameter2,
+
+      _Association(P_Parameter1:$parameters.P_Parameter1, P_Parameter2:$parameters.P_Parameter2).Parameter2 as ParameterAssoc,
+
+      _Association
+}
 ```
 
 ## CDS in ABAP
@@ -188,83 +248,239 @@ TODO Select einer CDS View mit Parameter
 ### OpenSQL Select
 
 ```abap
-TODO zmind2_select
+REPORT zmind2_select.
+
+SELECT FROM zmind2e_c_carrier
+    FIELDS airlineid, name
+    WHERE currencycode = 'EUR'
+    INTO TABLE @DATA(carriers).
+
+cl_demo_output=>display( carriers ).
 ```
 
 ```cds
-TODO
+@AbapCatalog.viewEnhancementCategory: [#NONE]
+@EndUserText.label: 'Carrier Consumption View'
+@Metadata.ignorePropagatedAnnotations: true
+@ObjectModel.usageType:{
+    serviceQuality: #X,
+    sizeCategory: #S,
+    dataClass: #MIXED
+}
+
+@AccessControl.authorizationCheck: #CHECK
+define view entity zmind2e_C_Carrier
+  as select from ZMIND2E_I_Carrier
+{
+  key AirlineId,
+      Name,
+      CurrencyCode,
+      /* Associations */
+      _Currency
+}
 ```
 
 #### OpenSQL Select mit Parameter
 
 ```abap
-TODO
+SELECT * FROM cdsfrwk_open_so_items_by_taxr( pCuCo: 'EUR' ) INTO TABLE @DATA(result).
 ```
 
 #### OpenSQL Select mit Assoziation
 
 ```abap
-TODO
+REPORT zmind2_select_association.
+
+SELECT FROM zmind2e_c_carrier
+    FIELDS
+        airlineid,
+        name,
+        \_currency-currency
+    INTO TABLE @DATA(carriers).
+
+cl_demo_output=>display( carriers ).
+
+
+SELECT FROM zmind2e_c_booking
+    FIELDS
+        bookingid,
+        \_bookingsupplement[ (1) LEFT OUTER ]-supplementid,
+        \_customer\_country\_text[ language = @sy-langu ]-countryname
+    INTO TABLE @DATA(bookings).
+
+cl_demo_output=>display( bookings ).
 ```
 
 ### ALV Integrated Data Access
 
 ```abap
-TODO zmind2_alv_ida
+REPORT zmind2_alv_ida.
+
+DATA: carrier TYPE zmind2_carrier_id.
+SELECT-OPTIONS so_carr FOR carrier.
+
+END-OF-SELECTION.
+
+  DATA(alv) = cl_salv_gui_table_ida=>create_for_cds_view(
+      iv_cds_view_name = 'zmind2e_c_carrier' ).
+
+  DATA(colletor) = NEW cl_salv_range_tab_collector( ).
+  colletor->add_ranges_for_name(
+      iv_name = 'AIRLINEID'
+      it_ranges = so_carr[] ).
+  colletor->get_collected_ranges(
+      IMPORTING et_named_ranges = DATA(named_ranges) ).
+  alv->set_select_options(
+      it_ranges = named_ranges ).
+
+  alv->fullscreen( )->display( ).
 ```
 
 #### ALV IDA mit Parameter
 
 ```cds
-TODO
+REPORT zmind2_alv_ida_parameter.
+
+DATA(alv) = cl_salv_gui_table_ida=>create_for_cds_view(
+    iv_cds_view_name = 'zmind2e_c_parameter' ).
+
+alv->set_view_parameters(
+  it_parameters = VALUE #(
+      ( name = 'P_Parameter' value = 'X' )
+  ) ).
+
+alv->fullscreen( )->display( ).
 ```
 
-## Annoatationen
+## Annotationen
 
 ### Annotationen Syntax
 
-```cds
-TODO ddic-based view
-```
+DDIC-based CDS View:
 
 ```cds
-TODO CDS View Entity
+@AbapCatalog.sqlViewName: 'ZMS2IBOOKSUPPL'
+@AbapCatalog.compiler.compareFilter: true
+@AbapCatalog.preserveKey: true
+@AccessControl.authorizationCheck: #NOT_REQUIRED
+
+@EndUserText.label: 'Booking Supplement View - CDS data model'
+
+@Search.searchable: true
+@VDM.viewType: #BASIC
+
+@ObjectModel.representativeKey: 'BookingSupplementID'
+@Analytics.dataCategory: #DIMENSION
+```
+
+CDS View Entity:
+
+```cds
+@AbapCatalog.viewEnhancementCategory: [#NONE]
+@AccessControl.authorizationCheck: #NOT_REQUIRED
+@EndUserText.label: 'Booking Supplement View Entity'
+@Metadata.ignorePropagatedAnnotations: true
+@ObjectModel.usageType:{
+    serviceQuality: #A,
+    sizeCategory: #XXL,
+    dataClass: #TRANSACTIONAL
+}
+
+@Search.searchable: true
+@VDM.viewType: #BASIC
+
+@ObjectModel.representativeKey: 'BookingSupplementID'
+@Analytics.dataCategory: #DIMENSION
+
+@AbapCatalog.entityBuffer.definitionAllowed: true
 ```
 
 ### Bezeichnertexte
 
 ```cds
-TODO
+...
+  @EndUserText.label: 'Flugziel'
+  @EndUserText.quickInfo: 'Zielland und -stadt des Fluges'
+  concat_with_space(_DestinationAirport.CountryCode, _DestinationAirport.City, 1) as Destination,
+
+  ...
 ```
 
 ### Einheitenreferenzen
 
 ```cds
-TODO
+...
+  @Semantics.quantity.unitOfMeasure: 'DistanceUnit'
+  cast(distance as abap.quan( 11, 0 )) as Distance,
+
+  distance_unit                        as DistanceUnit,
+...
 ```
 
 ### Währungsreferenzen
 
 ```cds
-TODO
+define view entity ZMIND2E_I_Flight
+  as select from zmind2_flight
+  association [0..1] to I_Currency as _Currency on $projection.CurrencyCode = _Currency.Currency
+{
+  key carrier_id            as AirlineID,
+  key connection_id         as ConnectionID,
+  key flight_date           as FlightDate,
+
+      @Semantics.amount.currencyCode: 'CurrencyCode'
+      price                 as Price,
+
+      @ObjectModel.foreignKey.association: '_Currency'
+      currency_code         as CurrencyCode,
+
+      // Weitere Felder
+
+      // Assoziation für Fremdschlüsselbeziehung
+      _Currency
+}
 ```
 
 ### Kontrakt für Key-User-Felderweiterung 
 
 ```cds
-TODO
+@EndUserText.label: 'Demo for C0 released API'
+@AccessControl.authorizationCheck: #NOT_REQUIRED
+@Metadata.ignorePropagatedAnnotations: true
+
+@AbapCatalog.extensibility: {
+  extensible: true,
+  elementSuffix: 'EMO',
+  allowNewDatasources: false,
+  dataSources: ['Persistence'],
+  quota: {
+    maximumFields: 250,
+    maximumBytes: 2500
+  }
+}
+define view entity DEMO_CDS_PRODUCTTP_E
+  as select from demo_product as Persistence
+{
+  key product_id
+}
 ```
 
 ### Deprecation
 
 ```cds
-TODO
+...
+  @VDM.lifecycle.status: #DEPRECATED
+  @VDM.lifecycle.successor: 'Product'
+  @API.element.releaseState: #DEPRECATED
+  @API.element.successor: 'Product'
+  Material,
+...
 ```
 
 ### Access Control Annotation
 
 ```cds
-TODO
+@AccessControl.authorizationCheck: #NOT_REQUIRED
 ```
 
 ### Fremdschlüsselbeziehung
@@ -272,13 +488,36 @@ TODO
 CDS View mit Fremdschlüssel:
 
 ```cds
-TODO
+@ObjectModel.representativeKey: 'FlightDate'
+
+define view entity ZMIND2E_I_Flight
+  as select from zmind2_flight
+
+  association [1]    to ZMIND2E_I_Carrier    as _Airline    on  $projection.AirlineID = _Airline.AirlineId
+{
+      @ObjectModel.foreignKey.association: '_Airline'
+  key carrier_id            as AirlineID,
+...
+      _Airline,
+...
+}
 ```
 
 CDS View mit repräsentativem Schlüssel:
 
 ```cds
-TODO
+@ObjectModel.representativeKey: 'AirlineId'
+
+define view entity ZMIND2E_I_Carrier
+  as select from zmind2_carrier
+{
+      @ObjectModel.text.element: ['Name']
+  key carrier_id            as AirlineId,
+
+      @Semantics.text: true
+      name                  as Name,
+...
+}
 ```
 
 ### Textbeziehungen
@@ -286,17 +525,44 @@ TODO
 #### Textbeziehung innerhalb einer View
 
 ```cds
-TODO
+define view entity ZMIND2E_I_Carrier
+  as select from zmind2_carrier
+{
+      @ObjectModel.text.element: ['Name']
+  key carrier_id            as AirlineId,
+
+      @Semantics.text: true
+      name                  as Name,
+...
+}
 ```
 
 #### Textbeziehung mit Text View
 
 ```cds
-TODO
+define view entity ZMIND2E_I_TravelStatus
+  as select from zmind2_trvl_stat
+  association [0..*] to ZMIND2E_I_TravelStatusText as _Text on $projection.TravelStatus = _Text.TravelStatus
+{
+      @ObjectModel.text.association: '_Text'
+  key travel_status as TravelStatus,
+
+      _Text
+}
 ```
 
 ```cds
-TODO
+@ObjectModel.dataCategory: #TEXT
+define view entity ZMIND2E_I_TravelStatusText
+  as select from zmind2_trvl_stxt
+{
+      @ObjectModel.text.element: ['Text']
+  key travel_status as TravelStatus,
+      @Semantics.language: true
+  key language      as Language,
+      @Semantics.text: true
+      text          as Text
+}
 ```
 
 ### Metadatenerweiterungen
@@ -304,33 +570,109 @@ TODO
 Erweiterte CDS View Entity:
 
 ```cds
-TODO
+@Metadata.allowExtensions: true
+define view entity ZREX_C_Flight
+  as projection on ZREX_I_Flight
+{
+  ...
 ```
 
 Metadatenwerweiterung:
 
 ```cds
-TODO
+@Metadata.layer: #PARTNER
+annotate entity ZREX_C_Flight with
+{
+  @UI.facet: [{
+      type: #COLLECTION,
+      id: 'DetailsCollection',
+      purpose: #STANDARD,
+      label: 'Details',
+      position: 10
+    },{
+      type: #FIELDGROUP_REFERENCE,
+      id: 'FlightFieldGroup',
+      targetQualifier: 'Flight',
+      parentId: 'DetailsCollection',
+      label: 'Flight',
+      position: 10
+    },{
+      type: #FIELDGROUP_REFERENCE,
+      id: 'AirplaneFieldGroup',
+      targetQualifier: 'Airplane',
+      parentId: 'DetailsCollection',
+      label: 'Airplane',
+      position: 20
+    }]
+
+  @UI.fieldGroup: [{ qualifier: 'Flight', position: 10 }]
+  CarrierId;
+
+  @UI.fieldGroup: [{ qualifier: 'Flight', position: 20 }]
+  ConnectionID;
+
+  @UI.fieldGroup: [{ qualifier: 'Flight', position: 30 }]
+  @UI.lineItem: [{ qualifier: 'Flight', position: 10 }]
+  FlightDate;
+
+  @UI.fieldGroup: [{ qualifier: 'Flight', position: 40 }]
+  Price;
+
+  @UI.fieldGroup: [{ qualifier: 'Airplane', position: 10 }]
+  @UI.lineItem: [{ qualifier: 'Flight', position: 20 }]
+  PlaneType;
+  
+  @UI.fieldGroup: [{ qualifier: 'Airplane', position: 20 }]
+  @UI.lineItem: [{ qualifier: 'Flight', position: 30 }]
+  MaximumSeats;
+  
+  @UI.fieldGroup: [{ qualifier: 'Airplane', position: 30 }]
+  @UI.lineItem: [{ qualifier: 'Flight', position: 40 }]
+  OccupiedSeats;
+}
 ```
 
 ## CDS View Erweiterung
 
 ```cds
-TODO
+@AbapCatalog.extensibility: {
+  extensible: true,
+  elementSuffix: 'ZAG',
+  allowNewDatasources: false,
+  dataSources: ['Agency'],
+  quota: {
+    maximumFields: 500,
+    maximumBytes: 5000
+  }
+}
+
+define view entity /DMO/E_Agency
+  as select from /dmo/agency as Agency
+{
+  key agency_id as AgencyId
+}
 ```
 
+```cds
+extend view entity /DMO/E_Agency with
+{
+  Agency./dmo/zzsloganzag as /DMO/ZZSloganZAG
+}
+```
 ## Entity Buffer
 
 ### Entity Buffer Annotation
 
 ```cds
-TODO
+@AbapCatalog.entityBuffer.definitionAllowed: true
 ```
 
 ### Entity Buffer Syntax
 
 ```cds
-TODO
+define view entity buffer on ZI_Flight
+  layer customer
+  type full
 ```
 
 ## Komposition
@@ -338,7 +680,28 @@ TODO
 ### Join
 
 ```cds
-TODO
+@AccessControl.authorizationCheck: #NOT_REQUIRED
+@EndUserText.label: 'CDS View entity_client handling'
+define view entity DEMO_CDS_CLIENT_HANDLING
+  as select from t000 as client_independent
+      left outer join demo_sales_order as _LeftOuter
+        on _LeftOuter.id = client_independent.cccategory
+      inner join demo_sales_order as _Inner
+        on _Inner.id = client_independent.cccategory
+      right outer join demo_sales_order as _RightOuter
+        on _RightOuter.id = client_independent.cccategory
+    association [0..1] to demo_sales_order as _Assoc
+      on _Assoc.id = client_independent.cccategory
+    {
+      key _Assoc.so_key,
+          _Assoc.id,
+          _Inner.id      as id_inner,
+          _LeftOuter.id  as id_LeftOuter,
+          _RightOuter.id as id_RightOuter,
+          client_independent.cccategory
+    }
+    where client_independent.mtext = abap.char'SAP AG Konzern'
+
 ```
 
 ### Assoziationen
@@ -346,19 +709,90 @@ TODO
 #### Syntax
 
 ```cds
-TODO
+define view entity ZMIND2E_I_Booking
+  as select from zmind2_booking
+
+  association [1..1] to ZMIND2E_I_Travel            as _Travel            on  $projection.TravelID = _Travel.TravelID
+  association [0..*] to ZMIND2E_I_BookingSupplement as _BookingSupplement on  $projection.BookingID = _BookingSupplement.BookingID
+                                                                          and $projection.TravelID  = _BookingSupplement.TravelID
+  association [1..1] to ZMIND2E_I_Customer          as _Customer          on  $projection.CustomerID = _Customer.CustomerId
+  association [1..1] to ZMIND2E_I_Carrier           as _Carrier           on  $projection.AirlineID = _Carrier.AirlineId
+  association [1..1] to ZMIND2E_I_Connection        as _Connection        on  $projection.AirlineID    = _Connection.AirlineId
+                                                                          and $projection.ConnectionID = _Connection.ConnectionId
+  association [1..1] to I_Currency                  as _Currency          on  $projection.CurrencyCode = _Currency.Currency
+
+{
+      @ObjectModel.foreignKey.association: '_Travel'
+      @Search.defaultSearchElement: true
+  key travel_id     as TravelID,
+
+      @Search.defaultSearchElement: true
+  key booking_id    as BookingID,
+      booking_date  as BookingDate,
+
+      @Consumption.valueHelpDefinition: [{entity: {name: 'ZMIND2E_I_Customer', element: 'CustomerId' }}]
+      @Search.defaultSearchElement: true
+      @ObjectModel.foreignKey.association: '_Customer'
+      customer_id   as CustomerID,
+
+      @ObjectModel.foreignKey.association: '_Carrier'
+      carrier_id    as AirlineID,
+
+      @ObjectModel.foreignKey.association: '_Connection'
+      connection_id as ConnectionID,
+
+      flight_date   as FlightDate,
+
+      @Semantics.amount.currencyCode: 'CurrencyCode'
+      flight_price  as FlightPrice,
+
+      @ObjectModel.foreignKey.association: '_Currency'
+      currency_code as CurrencyCode,
+
+      /* Associations */
+      _Travel,
+      _BookingSupplement,
+      _Customer,
+      _Carrier,
+      _Connection,
+      _Currency
+}
 ```
 
 #### Komplexe Komposition
 
 ```cds
-TODO
+...
+_Currency._Text[ inner where Language = 'D' ].CurrencyName      as CurrencyNameGerman,
+_Currency._Text[ left outer where Language = 'I' ].CurrencyName as CurrencyNameItalian,
+...
 ```
 
 ### Union
 
 ```cds
-TODO
+@AccessControl.authorizationCheck: #NOT_REQUIRED
+@Metadata.ignorePropagatedAnnotations: true
+@AbapCatalog.viewEnhancementCategory: [#PROJECTION_LIST,#UNION]
+define view entity DEMO_CDS_UNION_VE
+  as select from
+    demo_join1
+    {
+      a as c1,
+      b as c2
+    }
+union select from
+  demo_join2
+    {
+      d as c1,
+      e as c2
+    }
+union all select from
+  demo_join3
+    {
+      i as c1,
+      j as c2
+    }
 ```
 
 ## Access Control
@@ -366,13 +800,22 @@ TODO
 ### Access Control Syntax
 
 ```cds
-TODO
+@EndUserText.label: 'Carrier'
+@MappingRole: true
+define role ZMIND2E_C_CARRIER {
+  grant select on ZMIND2E_C_CARRIER
+    where (AirlineId) = aspect pfcg_auth(S_CARRID, CARRID, ACTVT = '03' );
+}
 ```
 
 ### Access Control Vererbung
 
 ```cds
-TODO
+@MappingRole: true
+define role ZC_SalesOrder {
+  grant select on ZC_SalesOrder
+    where inheriting conditions from entity ZI_SalesOrder;
+}
 ```
 
 ### Access Control Redefinition
@@ -456,7 +899,16 @@ TODO
 ## Service Definition
 
 ```cds
-TODO
+@EndUserText.label: 'Service definition for FuncLoc Odata'
+define service API_FUNCTIONALLOCATION {
+  expose A_FunctionalLocation as FunctionalLocation;
+  expose A_FunctionalLocationLongText as FunctionalLocationLongText;
+  expose A_FunctionalLocationPartner as FunctionalLocationPartner;
+  expose A_FuncnlLocClfnClass as FunctionalLocationClass;
+  expose A_FuncnlLocClfnClassChar as Characteristic;
+  expose A_FuncnlLocClfnCharValue as Value;
+  expose A_FuncnlLocWarrantyAssgmt as FunctionalLocationWarranty;
+}
 ```
 
 ## Fiori Elements
@@ -464,55 +916,221 @@ TODO
 ### Line Item
 
 ```cds
-TODO
+@AbapCatalog.sqlViewName: 'ZMS2EXCBOOKSUPPL'
+@AbapCatalog.compiler.compareFilter: true
+@AbapCatalog.preserveKey: true
+@AccessControl.authorizationCheck: #CHECK
+@EndUserText.label: 'Booking Supplement Consumption View'
+
+define view ZMIND2EX_C_BookingSupplement
+  as select from ZMind2Ex_I_BookingSupplement
+{
+  key TravelID,
+  key BookingID,
+  key BookingSupplementID,
+      @UI.lineItem: [{ position: 20 }]
+      SupplementID,
+      @UI.lineItem: [{ position: 10 }]
+      SupplementType,
+      @UI.lineItem: [{ position: 30 }]
+      Price,
+      CurrencyCode,
+      /* Associations */
+      _Booking,
+      _SupplementText
+}
 ```
 
 ### Freitextsuche
 
 ```cds
-TODO
+@Search.searchable: true
+
+define view entity ZMIND2E_I_Flight
+  as select from zmind2_flight
+{
+      @Search.defaultSearchElement: true
+      @Search.fuzzinessThreshold: 0.8
+      @ObjectModel.foreignKey.association: '_Airline'
+  key carrier_id            as AirlineID,
+
+      @Search.defaultSearchElement: true
+      @Search.fuzzinessThreshold: 0.8
+      @ObjectModel.foreignKey.association: '_Connection'
+  key connection_id         as ConnectionID,
+
+  key flight_date           as FlightDate,
+...
+}
 ```
 
 ### Filter
 
 ```cds
-TODO
+...
+  @UI.selectionField: [{ position: 10 }]
+  @Consumption.filter: {
+    selectionType: #INTERVAL,
+    mandatory: true
+  }
+  EndDate,
+...
 ```
 
 ### Suchhilfen
 
+Einfache Suchhilfe:
+
 ```cds
-TODO
+@Consumption.valueHelpDefinition: [{ entity.name: 'I_CurrencyStdVH', entity.element: 'Currency' }]
+CurrencyCode
+```
+
+Suchhilfe mit erweiterten Abhängigkeiten:
+
+```cds
+...
+@Consumption.valueHelpDefinition: [{
+  entity: { name: 'ZMIND2E_I_FlightVH', element: 'AirlineID' },
+  additionalBinding: [
+    { element: 'ConnectionID', localElement: 'ConnectionId', usage: #RESULT },
+    { element: 'FlightDate', localElement: 'FlightDate', usage: #RESULT }
+  ]
+}]
+CarrierId,
+
+@Consumption.valueHelpDefinition: [{
+  entity: { name: 'ZMIND2E_I_FlightVH', element: 'ConnectionID' },
+  additionalBinding: [
+    { element: 'AirlineID', localElement: 'CarrierId', usage: #FILTER_AND_RESULT },
+    { element: 'FlightDate', localElement: 'FlightDate', usage: #RESULT }
+  ]
+}]
+ConnectionId,
+
+@Consumption.valueHelpDefinition: [{
+  entity: { name: 'ZMIND2E_I_FlightVH', element: 'FlightDate' },
+  additionalBinding: [
+    { element: 'AirlineID', localElement: 'CarrierId', usage: #FILTER_AND_RESULT },
+    { element: 'ConnectionID', localElement: 'ConnectionId', usage: #FILTER_AND_RESULT }
+  ]
+}]
+FlightDate,
+...
 ```
 
 ### Tabellenbezeichnung
 
 ```cds
-TODO
+@UI.headerInfo: {
+  typeName: 'Booking',
+  typeNamePlural: 'Bookings'
+}
 ```
 
 ### Semantische Hervorhebung
 
 ```cds
-TODO
+@Metadata.layer: #CUSTOMER
+@UI.headerInfo.title.criticality: 'StatusCriticality'
+annotate view ZMIND2RAP_C_Travel with
+{
+  @UI.lineItem: [
+    { exclude: true },
+    { position: 50, criticality: 'StatusCriticality' }
+  ]
+  @UI.fieldGroup: [{ qualifier: 'Details', position: 40, criticality: 'StatusCriticality' }]
+  @UI.textArrangement: #TEXT_ONLY
+  Status;
+
+  @UI.hidden: true
+  StatusCriticality;
+}
 ```
 
 ### Gruppieren & Sortieren
 
 ```cds
-TODO
+@UI.presentationVariant: [{ 
+    sortOrder: [{ by: 'FlightDate', direction: #ASC }],
+    groupBy: ['CarrierId']
+}]
+
+annotate view ZMIND2RAP_C_Booking with
+{
+...
 ```
 
 ### Seitentitel
 
 ```cds
-TODO
+@UI.headerInfo: {
+    typeName: 'Travel',
+    typeNamePlural: 'Travels',
+    title.value: 'Description',
+    description.value: 'CustomerId'
+}
 ```
 
 ### Facetten
 
 ```cds
-TODO
+ @UI.facet: [{
+    type: #COLLECTION,
+    id: 'TravelCollection',
+    label: 'Travel',
+    purpose: #STANDARD,
+    position: 10
+  },{
+    type: #FIELDGROUP_REFERENCE,
+    id: 'DetailsFieldGroup',
+    targetQualifier: 'Details',
+    parentId: 'TravelCollection',
+    label: 'Details',
+    position: 10
+  },{
+    type: #COLLECTION,
+    id: 'CustomerCollection',
+    label: 'Customer',
+    purpose: #STANDARD,
+    position: 20
+  },{
+    type: #FIELDGROUP_REFERENCE,
+    id: 'CustomerFieldGroup',
+    parentId: 'CustomerCollection',
+    targetQualifier: 'Customer',
+    label: 'Customer',
+    position: 10
+  },{
+    type: #LINEITEM_REFERENCE,
+    id: 'BookingLineItem',
+    purpose: #STANDARD,
+    targetElement: '_Booking',
+    targetQualifier: 'Booking',
+    position: 30,
+    label: 'Bookings'
+  },{
+    type: #FIELDGROUP_REFERENCE,
+    id: 'TraceFieldGroup',
+    targetQualifier: 'Trace',
+    purpose: #STANDARD,
+    label: 'Trace',
+    position: 40
+  },{
+    type: #FIELDGROUP_REFERENCE,
+    id: 'DatesFieldGroup',
+    targetQualifier: 'Dates',
+    parentId: 'TravelCollection',
+    label: 'Date',
+    position: 20
+  },{
+    type: #FIELDGROUP_REFERENCE,
+    id: 'PricesFieldGroup',
+    targetQualifier: 'Prices',
+    parentId: 'TravelCollection',
+    label: 'Price',
+    position: 40
+  }]
 ```
 
 ## Virtuelle Elemente
@@ -520,25 +1138,175 @@ TODO
 ### Annotationen für virtuelle Elemente
 
 ```cds
-TODO
+define view entity /DMO/C_Booking_VE
+  as projection on /DMO/I_Booking_U
+{ ...
+          @ObjectModel.virtualElementCalculatedBy: 'ABAP:/DMO/CL_DAYS_TO_FLIGHT'
+          @EndUserText.label: 'Days to Flight'
+  virtual DaysToFlight : abap.int2,
+  …}
 ```
 
 ### Virtuelle Elemente: Datenberechnung
 
 ```abap
-TODO
+CLASS /dmo/cl_days_to_flight DEFINITION
+  PUBLIC
+  FINAL
+  CREATE PUBLIC .
+
+  PUBLIC SECTION.
+    INTERFACES if_sadl_exit_calc_element_read.
+  PROTECTED SECTION.
+  PRIVATE SECTION.
+ENDCLASS.
+
+CLASS /dmo/cl_days_to_flight IMPLEMENTATION.
+  METHOD if_sadl_exit_calc_element_read~get_calculation_info.
+    IF iv_entity <> '/DMO/C_BOOKING_VE'.
+      RAISE EXCEPTION TYPE /dmo/cx_virtual_elements
+        EXPORTING
+          textid = /dmo/cx_virtual_elements=>entity_not_known
+          entity = iv_entity.
+    ENDIF.
+
+    LOOP AT it_requested_calc_elements ASSIGNING FIELD-SYMBOL(<fs_calc_element>).
+      CASE <fs_calc_element>.
+        WHEN 'DAYSTOFLIGHT'.
+          APPEND 'FLIGHTDATE' TO et_requested_orig_elements.
+
+*        WHEN 'ANOTHERELEMENT'.
+*          APPEND '' ...
+
+        WHEN OTHERS.
+          RAISE EXCEPTION TYPE /dmo/cx_virtual_elements
+            EXPORTING
+              textid  = /dmo/cx_virtual_elements=>virtual_element_not_known
+              element = <fs_calc_element>
+              entity  = iv_entity.
+      ENDCASE.
+    ENDLOOP.
+  ENDMETHOD.
+
+  METHOD if_sadl_exit_calc_element_read~calculate.
+    DATA(lv_today) = cl_abap_context_info=>get_system_date( ).
+
+    DATA lt_original_data TYPE STANDARD TABLE OF /dmo/c_booking_proc_ve WITH DEFAULT KEY.
+    lt_original_data = CORRESPONDING #( it_original_data ).
+
+    LOOP AT lt_original_data ASSIGNING FIELD-SYMBOL(<fs_original_data>).
+      <fs_original_data>-DaysToFlight =  <fs_original_data>-FlightDate - lv_today.
+    ENDLOOP.
+
+    ct_calculated_data = CORRESPONDING #(  lt_original_data ).
+  ENDMETHOD.
+ENDCLASS.
 ```
 
 ### Virtuelle Elemente: Filterung
 
+```cds
+define view <CdsConsumptionView> 
+		as select from <data_source>
+{
+		...    
+		@ObjectModel.filter.transformedBy: 'ABAP:<code_exit_class>'
+		cast( '' as <dtype> preserving type) as <view.element>
+		...
+} 
+```
+
 ```abap
-TODO
+CLASS zcl_filter_discount DEFINITION
+  PUBLIC
+  FINAL
+  CREATE PUBLIC .
+
+  PUBLIC SECTION.
+    INTERFACES:
+      if_sadl_exit_filter_transform.
+  PROTECTED SECTION.
+  PRIVATE SECTION.
+ENDCLASS.
+
+
+
+CLASS zcl_filter_discount IMPLEMENTATION.
+
+  METHOD if_sadl_exit_filter_transform~map_atom.
+    IF iv_element <> 'GROSSAMOUNTWITHDISCOUNT'.
+      RAISE EXCEPTION TYPE zcx_filter_exit EXPORTING textid = zcx_filter_exit=>element_not_expected.
+    ENDIF.
+
+    DATA(lo_cfac) = cl_sadl_cond_prov_factory_pub=>create_simple_cond_factory( ).
+    DATA(amount) = lo_cfac->element( 'CONVERTEDGROSSAMOUNT' ).
+    DATA(lv_originalvalue) = 1000 + ( iv_value - 1000 ) / '0.9'.
+
+    CASE iv_operator.
+
+      WHEN if_sadl_exit_filter_transform~co_operator-equals.
+
+        ro_condition = amount->less_than(    1000 )->and( amount->equals( iv_value )
+                )->or( amount->greater_than( 1000 )->and( amount->equals( lv_originalvalue ) ) ).
+
+      WHEN if_sadl_exit_filter_transform~co_operator-less_than.
+
+        ro_condition = amount->less_than(    1000 )->and( amount->less_than( iv_value ) 
+                )->or( amount->greater_than( 1000 )->and( amount->less_than( lv_originalvalue ) ) ).
+
+      WHEN if_sadl_exit_filter_transform~co_operator-greater_than.
+        ro_condition = amount->less_than(    1000 )->and( amount->greater_than( iv_value ) 
+                )->or( amount->greater_than( 1000 )->and( amount->greater_than( lv_originalvalue ) ) ).
+
+      WHEN if_sadl_exit_filter_transform~co_operator-is_null.
+        ro_condition = amount->is_null( ).
+
+      WHEN if_sadl_exit_filter_transform~co_operator-covers_pattern.
+        RAISE EXCEPTION TYPE zcx_filter_exit.
+
+    ENDCASE.
+  ENDMETHOD.
 ```
 
 ### Virtuelle Elemente: Sortierung
 
+```cds
+define view <CdsConsumptionView> 
+		as select from <data_source>
+{
+		...    
+		@ObjectModel.sort.transformedBy: 'ABAP:<code_exit_class>'
+		cast( '' as <dtype> preserving type) as <view.element>
+		...
+}
+```
+
 ```abap
-TODO
+CLASS zcl_sort_discount DEFINITION
+  PUBLIC
+  FINAL
+  CREATE PUBLIC .
+
+  PUBLIC SECTION.
+      INTERFACES:
+      if_sadl_exit_sort_transform.
+  PROTECTED SECTION.
+  PRIVATE SECTION.
+ENDCLASS.
+
+
+
+CLASS zcl_sort_discount IMPLEMENTATION.
+
+
+  METHOD if_sadl_exit_sort_transform~map_element.
+    IF iv_element <> 'GROSSAMOUNTWITHDISCOUNT'.
+      RAISE EXCEPTION TYPE zcx_sorting_exit EXPORTING textid = zcx_sorting_exit=>element_not_expected.
+    ENDIF.
+      APPEND value #( name = `CONVERTEDGROSSAMOUNT` ) TO et_sort_elements.
+  ENDMETHOD.
+
+ENDCLASS.
 ```
 
 ## Analytics
@@ -572,11 +1340,40 @@ TODO
 ### CDS Hierarchien
 
 ```cds
-TODO
+define view entity ZMIND2_I_FuncLocRel
+  as select from I_FunctionalLocation
+  association [0..1] to ZMIND2_I_FuncLocRel as _Parent on $projection.SuperiorFunctionalLocation = _Parent.FunctionalLocation
+{
+  key FunctionalLocation,
+      SuperiorFunctionalLocation,
+      _FunctionalLocationText[1:Language=$session.system_language].FunctionalLocationName,
+
+      _Parent
+}
 ```
 
 ```cds
-TODO
+define hierarchy ZMIND2_I_FuncLocationHierarchy
+  as parent child hierarchy(
+    source ZMIND2_I_FuncLocRel
+    child to parent association _Parent
+    siblings order by
+      FunctionalLocation ascending
+    orphans root
+  )
+{
+  key FunctionalLocation,
+      FunctionalLocationName,
+      SuperiorFunctionalLocation,
+      $node.parent_id             as ParentNode,
+      $node.node_id               as NodeId,
+      $node.hierarchy_is_cycle    as IsCycle,
+      $node.hierarchy_is_orphan   as IsOrphan,
+      $node.hierarchy_level       as HierarchyLevel,
+      $node.hierarchy_rank        as HierarchyRank,
+      $node.hierarchy_parent_rank as HierarchyParentRank,
+      $node.hierarchy_tree_size   as HierarchyTreeSize
+}
 ```
 
 ## Code Pushdown
