@@ -64,6 +64,13 @@ extend view E_PurchasingDocumentItem with ZEXT_XE_PurchasingDocumentItem        
 }
 ```
 
+```cds
+extend view I_BusinessPArtner with ZXI_BusinessPartner
+{
+  but000.zz_append_field as MyAppendField
+}
+```
+
 ## Basic Interface View erweitern
 
 Dieser Schritt ist optional sollte aber in einer sauberen Umsetzung immer durchgeführt werden. Die Erweiterung der Basic Interface View des Datenmodells ermöglicht die spätere Nutzung des kundeneigenen Feld auch in auf CDS basierenden, kundeneigenen Anwendungen und Datenmodellen.
