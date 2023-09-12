@@ -78,6 +78,29 @@ extend view entity I_BusinessPartner2 with
 }
 ```
 
+```cds
+define view E_BP_D
+  as select from but000 as Persistence
+{
+  key Persistence.partner as BusinessPartner
+}
+```
+
+```cds
+extend view I_BusinessPartner with ZXI_BusinessPartner
+{
+  Persistence.zz_append_field as MyAppendField
+}
+```
+
+```cds
+extend view C_BusinessPartner with ZXC_BusinessPartner
+{
+  _BusinessPartnerExt.MyAppendField
+}
+```
+
+
 ## Basic Interface View erweitern
 
 Dieser Schritt ist optional sollte aber in einer sauberen Umsetzung immer durchgeführt werden. Die Erweiterung der Basic Interface View des Datenmodells ermöglicht die spätere Nutzung des kundeneigenen Feld auch in auf CDS basierenden, kundeneigenen Anwendungen und Datenmodellen.
