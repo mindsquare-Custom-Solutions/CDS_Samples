@@ -65,7 +65,7 @@ extend view E_PurchasingDocumentItem with ZEXT_XE_PurchasingDocumentItem        
 ```
 
 ```cds
-extend view I_BusinessPArtner with ZXI_BusinessPartner
+extend view I_BusinessPartner with ZXI_BusinessPartner
 {
   but000.zz_append_field as MyAppendField
 }
