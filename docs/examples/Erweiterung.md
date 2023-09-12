@@ -56,11 +56,11 @@ define view E_PurchasingDocumentItem as select from ekpo as Persistence {
 CDS View Erweiterung für das Beispiel:
 
 ```cds
-@AbapCatalog.sqlViewAppendName: 'ZEXTXEPDI'     // Schritt 2
+@AbapCatalog.sqlViewAppendName: 'ZEXTXEPDI'                                               // Schritt 2
 @EndUserText.label: 'CDS Extension Demo'
 extend view E_PurchasingDocumentItem with ZEXT_XE_PurchasingDocumentItem                  // Schritt 3
 {
-  Persistence.zz_ext_demo as ExtensionDemoField // Schritt 4
+  Persistence.zz_ext_demo as ExtensionDemoField                                           // Schritt 4
 }
 ```
 
