@@ -41,9 +41,12 @@ define view entity ZMIND2E_I_Booking
       carrier_id            as CarrierId,
       connection_id         as ConnectionID,
       flight_date           as FlightDate,
+
     	@Semantics.amount.currencyCode: 'CurrencyCode'
       flight_price          as FlightPrice,
       currency_code         as CurrencyCode,
+
+      @EndUserText.label: 'Last changed date'
       local_last_changed_at as LocalLastChangedAt
 }
 ```
