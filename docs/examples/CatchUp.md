@@ -4,7 +4,7 @@
 @AbapCatalog.viewEnhancementCategory: [#PROJECTION_LIST]
 @AccessControl.authorizationCheck: #NOT_REQUIRED
 @EndUserText.label: 'Customer Basic View Entity'
-define view entity ZI<YOUR_NAME_ABBREVIATION>_Customer
+define view entity ZI_<YOUR_NAME_ABBREVIATION>_Customer
   as select from zmind2_customer
 {
   key customer_id   as CustomerId,
@@ -31,7 +31,7 @@ define view entity ZI<YOUR_NAME_ABBREVIATION>_Customer
 @AccessControl.authorizationCheck: #CHECK
 @EndUserText.label: 'Booking Basic View Entity'
 
-define view entity ZMIND2E_I_Booking
+define view entity ZI_<YOUR_NAME_ABBREVIATION>_Booking
   as select from zmind2_booking
 {
   key travel_id             as TravelID,
