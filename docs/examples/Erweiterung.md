@@ -87,7 +87,7 @@ define view E_BP_D
 ```
 
 ```cds
-extend view I_BusinessPartner with ZXI_BusinessPartner
+extend view E_BP_D with ZXE_BP_D1
 {
   Persistence.zz_append_field as MyAppendField
 }
