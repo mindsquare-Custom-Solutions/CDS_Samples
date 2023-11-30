@@ -1490,7 +1490,7 @@ environment->get_access_control_double( )->enable_access_control( i_access_contr
 #### Test: Berechtigungen mocken
 
 ```abap
-FINAL(acm_data_no_authorization) = cl_cds_test_data=>create_access_control_data(
+FINAL(acm_data_with_authorization) = cl_cds_test_data=>create_access_control_data(
                                         i_role_authorizations = VALUE #(
                                             ( object         = 'ZX_CARRIER'
                                               authorizations = VALUE #( ( VALUE #( ( fieldname   = 'ZX_CARRIER'
@@ -1499,5 +1499,5 @@ FINAL(acm_data_no_authorization) = cl_cds_test_data=>create_access_control_data(
                                                                                   ( fieldname   = 'ACTVT'
                                                                                     fieldvalues = VALUE #(
                                                                                         ( lower_value = '03' ) ) ) ) ) ) ) ) ).
-environment->get_access_control_double( )->enable_access_control(  i_access_control_data = acm_data_no_authorization ).
+environment->get_access_control_double( )->enable_access_control(  i_access_control_data = acm_data_with_authorization ).
 ```
