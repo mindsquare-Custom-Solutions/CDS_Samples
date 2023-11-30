@@ -1477,17 +1477,27 @@ TODO
 #### Berechtigungsprüfung deaktivieren
 
 ```abap
-TODO
+environment->get_access_control_double( )->disable_access_control( ).
 ```
 
 #### Test unberechtigter Nutzer
 
 ```abap
-TODO
+data(acm_data_no_authorization) = cl_cds_test_data=>create_access_control_data( i_role_authorizations = VALUE #( ) ).
+environment->get_access_control_double( )->enable_access_control( i_access_control_data = acm_data_no_authorization ).
 ```
 
 #### Test: Berechtigungen mocken
 
 ```abap
-TODO
+FINAL(acm_data_no_authorization) = cl_cds_test_data=>create_access_control_data(
+                                        i_role_authorizations = VALUE #(
+                                            ( object         = 'ZX_CARRIER'
+                                              authorizations = VALUE #( ( VALUE #( ( fieldname   = 'ZX_CARRIER'
+                                                                                    fieldvalues = VALUE #(
+                                                                                        ( lower_value = 'LH' ) ) )
+                                                                                  ( fieldname   = 'ACTVT'
+                                                                                    fieldvalues = VALUE #(
+                                                                                        ( lower_value = '03' ) ) ) ) ) ) ) ) ).
+environment->get_access_control_double( )->enable_access_control(  i_access_control_data = acm_data_no_authorization ).
 ```
