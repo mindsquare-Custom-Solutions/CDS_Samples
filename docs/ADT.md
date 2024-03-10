@@ -10,55 +10,55 @@ User Guides:
 
 | Keys | Function |
 | -- | -- |
-| <kbr>CTRL</kbr> + <kbr>SHIFT</kbr> + <kbr>L</kbr> | Display all shortcuts |
+| <kbd>CTRL</kbd> + <kbd>SHIFT</kbd> + <kbd>L</kbd> | Display all shortcuts |
 
 ### Navigation
 
 | Keys | Function |
 | -- | -- |
-| <kbr>F3</kbr> | Navigate to source |
-| <kbr>SHIFT</kbr> + <kbr>F3</kbr> | Navigate to declaration |
-| <kbr>ALT</kbr> + <kbr>→</kbr> | Forward navigation |
-| <kbr>ALT</kbr> + <kbr>←</kbr> | Backward navigation |
-| <kbr>CTRL</kbr> + <kbr>3</kbr> | Quick access |
-| <kbr>CTRL</kbr> + <kbr>F8</kbr> | Switch perspective |
-| <kbr>CRTL</kbr> + <kbr>6</kbr> | Open in SAP GUI |
-| <kbr>CTRL</kbr> + <kbr>SHIFT</kbr> + <kbr>A</kbr> | Open development object |
+| <kbd>F3</kbd> | Navigate to source |
+| <kbd>SHIFT</kbd> + <kbd>F3</kbd> | Navigate to declaration |
+| <kbd>ALT</kbd> + <kbd>→</kbd> | Forward navigation |
+| <kbd>ALT</kbd> + <kbd>←</kbd> | Backward navigation |
+| <kbd>CTRL</kbd> + <kbd>3</kbd> | Quick access |
+| <kbd>CTRL</kbd> + <kbd>F8</kbd> | Switch perspective |
+| <kbd>CRTL</kbd> + <kbd>6</kbd> | Open in SAP GUI |
+| <kbd>CTRL</kbd> + <kbd>SHIFT</kbd> + <kbd>A</kbd> | Open development object |
 
 ### Development
 
 | Keys | Function |
 | -- | -- |
-| <kbr>F1</kbr> | ABAP language help |
-| <kbr>F2</kbr> | Display signature (Show content of `ABAP Element Info` View) |
-| <kbr>CTRL</kbr> + <kbr>SPACE</kbr> | Code completion |
-| <kbr>CTRL</kbr> + <kbr>S</kbr> | Save object |
-| <kbr>CTRL</kbr> + <kbr>F2</kbr> | Syntax check |
-| <kbr>CTRL</kbr> + <kbr>F3</kbr> | Activate object |
-| <kbr>CTRL</kbr> + <kbr>SHIFT</kbr> + <kbr>F3</kbr> | Activate multiple objects |
-| <kbr>SHIFT</kbr> + <kbr>F1</kbr> | Pretty printer |
-| <kbr>CTRL</kbr> + <kbr>D</kbr> | ABAP Cleaner: Clean up with automated ABAP Cleaner |
-| <kbr>CTRL</kbr> + <kbr>SHIFT</kbr> + <kbr>4</kbr> | ABAP Cleaner: Clean up with interactive ABAP Cleaner |
-| <kbr>CTRL</kbr> + <kbr>SHIFT</kbr> + <kbr>G</kbr> | Where used search |
-| <kbr>CTRL</kbr> + <kbr>SHIFT</kbr> + <kbr>N</kbr> | New development object |
-| <kbr>CTRL</kbr> + <kbr>D</kbr> | Delete line |
-| <kbr>ALT</kbr> + <kbr>↑</kbr> | Move line up |
-| <kbr>ALT</kbr> + <kbr>↓</kbr> | Move line down |
-| <kbr>F8</kbr> | Run as ABAP Application (Data Preview for Tables & CDS Views) |
-| <kbr>F9</kbr> | Run as ABAP Application (Console) |
+| <kbd>F1</kbd> | ABAP language help |
+| <kbd>F2</kbd> | Display signature (Show content of `ABAP Element Info` View) |
+| <kbd>CTRL</kbd> + <kbd>SPACE</kbd> | Code completion |
+| <kbd>CTRL</kbd> + <kbd>S</kbd> | Save object |
+| <kbd>CTRL</kbd> + <kbd>F2</kbd> | Syntax check |
+| <kbd>CTRL</kbd> + <kbd>F3</kbd> | Activate object |
+| <kbd>CTRL</kbd> + <kbd>SHIFT</kbd> + <kbd>F3</kbd> | Activate multiple objects |
+| <kbd>SHIFT</kbd> + <kbd>F1</kbd> | Pretty printer |
+| <kbd>CTRL</kbd> + <kbd>D</kbd> | ABAP Cleaner: Clean up with automated ABAP Cleaner |
+| <kbd>CTRL</kbd> + <kbd>SHIFT</kbd> + <kbd>4</kbd> | ABAP Cleaner: Clean up with interactive ABAP Cleaner |
+| <kbd>CTRL</kbd> + <kbd>SHIFT</kbd> + <kbd>G</kbd> | Where used search |
+| <kbd>CTRL</kbd> + <kbd>SHIFT</kbd> + <kbd>N</kbd> | New development object |
+| <kbd>CTRL</kbd> + <kbd>D</kbd> | Delete line |
+| <kbd>ALT</kbd> + <kbd>↑</kbd> | Move line up |
+| <kbd>ALT</kbd> + <kbd>↓</kbd> | Move line down |
+| <kbd>F8</kbd> | Run as ABAP Application (Data Preview for Tables & CDS Views) |
+| <kbd>F9</kbd> | Run as ABAP Application (Console) |
 
 ### Test & Refactoring
 | Keys | Function |
 | -- | -- |
-| <kbr>CTRL</kbr> + <kbr>1</kbr> | Quick Assistant |
-| <kbr>CTRL</kbr> + <kbr>SHIFT</kbr> + <kbr>F9</kbr> | List tests |
-| <kbr>CTRL</kbr> + <kbr>SHIFT</kbr> + <kbr>F10</kbr> | Run tests |
-| <kbr>CTRL</kbr> + <kbr>SHIFT</kbr> + <kbr>F11</kbr> | Run tests with coverage analyser |
-| <kbr>CTRL</kbr> + <kbr>SHIFT</kbr> + <kbr>F12</kbr> | Run tests with configuration |
-| <kbr>CTRL</kbr> + <kbr>SHIFT</kbr> + <kbr>B</kbr> | Set break point |
-| <kbr>ALT</kbr> + <kbr>SHIFT</kbr> + <kbr>M</kbr> | Extract method |
-| <kbr>ALT</kbr> + <kbr>SHIFT</kbr> + <kbr>R</kbr> | Rename |
-| <kbr>ALT</kbr> + <kbr>U</kbr> | Delete unused variables |
-| <kbr>ALT</kbr> + <kbr>7</kbr> | Toggle comment |
-| <kbr>CTRL</kbr> + <kbr><</kbr> | Comment |
-| <kbr>CTRL</kbr> + <kbr>SHIFT</kbr> + <kbr><</kbr> | Uncomment |
+| <kbd>CTRL</kbd> + <kbd>1</kbd> | Quick Assistant |
+| <kbd>CTRL</kbd> + <kbd>SHIFT</kbd> + <kbd>F9</kbd> | List tests |
+| <kbd>CTRL</kbd> + <kbd>SHIFT</kbd> + <kbd>F10</kbd> | Run tests |
+| <kbd>CTRL</kbd> + <kbd>SHIFT</kbd> + <kbd>F11</kbd> | Run tests with coverage analyser |
+| <kbd>CTRL</kbd> + <kbd>SHIFT</kbd> + <kbd>F12</kbd> | Run tests with configuration |
+| <kbd>CTRL</kbd> + <kbd>SHIFT</kbd> + <kbd>B</kbd> | Set break point |
+| <kbd>ALT</kbd> + <kbd>SHIFT</kbd> + <kbd>M</kbd> | Extract method |
+| <kbd>ALT</kbd> + <kbd>SHIFT</kbd> + <kbd>R</kbd> | Rename |
+| <kbd>ALT</kbd> + <kbd>U</kbd> | Delete unused variables |
+| <kbd>ALT</kbd> + <kbd>7</kbd> | Toggle comment |
+| <kbd>CTRL</kbd> + <kbd><</kbd> | Comment |
+| <kbd>CTRL</kbd> + <kbd>SHIFT</kbd> + <kbd><</kbd> | Uncomment |
