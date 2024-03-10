@@ -10,6 +10,8 @@ TODO
 
 ## Core Data Services - Grundlagen
 
+[Feature Availability Matrix](https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/index.htm?file=abencds_language_elements.htm)
+
 ### Syntax DDIC-based CDS View
 
 ```cds
@@ -36,7 +38,8 @@ define view ZMIND2_I_AIRPORT
 
 ### Syntax CDS View Entity
 
->Ab S/4HANA 2020
+> [!NOTE]  
+> ab S/4HANA 2020
 
 ```cds
 @AbapCatalog.viewEnhancementCategory: [#NONE]
@@ -74,6 +77,7 @@ define view entity ZI_CAST
 
 ### Literale
 
+> [!NOTE]
 > Typisierte Literale ab S/4HANA 2020 und nur in CDS View Entities unterstützt
 
 ```cds
@@ -150,6 +154,7 @@ define view entity demo_cds_session_variables_ve
 
 ### Wiederverwendung von Feldern
 
+> [!NOTE]
 >Ab S/4HANA 2022
 
 ```cds
@@ -756,6 +761,29 @@ define view entity ZMIND2E_I_Booking
       _Carrier,
       _Connection,
       _Currency
+}
+```
+
+#### Neue Kardinalitätssyntax
+
+> [!NOTE]
+> ab S/4HANA 2023 verwendbar
+>
+> SAP empfiehlt die Verwendung der Wortsyntax statt der Klammersyntax, da Performanceoptimierungen iun manchen Konstellationen möglich sind
+
+```cds
+define view entity DEMO_CDS_CARDINALITY_IN_WORDS
+  as select from demo_sales_mat
+
+  association of exact one to one DEMO_SALES_CDS_MAT_TEXT as _Text  
+    on  $projection.material = _Text.material
+    and _Text.language       = $session.system_language
+{
+  key matnr as material,
+      mtart as material_type,
+      mtgrp as material_group,
+      _Text,
+      _Text.material_name
 }
 ```
 
