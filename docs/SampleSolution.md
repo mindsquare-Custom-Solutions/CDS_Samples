@@ -1868,6 +1868,77 @@ group by
   NewCurrencyCode
 ```
 
+## Custom Entities
+Preconditions for this step:
+- None
+
+### Defining the custom entity
+```cds
+@EndUserText.label: 'Custom Entity View Example'
+@ObjectModel.query.implementedBy: 'ABAP:ZCL_MS_CUSTOM_ENTITY'
+define custom entity ZI_MS_CustomEntity
+{
+      @UI.lineItem:[ { position: 10 } ]
+  key TravelId   : abap.numc( 8 );
+      @UI.lineItem:[ { position: 20 } ]
+      AgencyId   : abap.numc( 6 );
+      @UI.lineItem:[ { position: 30 } ]
+      CustomerId : abap.numc( 6 );
+      @UI.lineItem:[ { position: 40 } ]
+      BeginDate  : abap.dats;
+      @UI.lineItem:[ { position: 50 } ]
+      EndDate    : abap.dats;
+      @UI.lineItem:[ { position: 60 } ]
+      FullPrice  : abap.dec( 17, 3 );
+      @UI.lineItem:[ { position: 70 } ]
+      Currency   : abap.cuky;
+      @UI.lineItem:[ { position: 80 } ]
+      Status     : abap.char( 1 );
+}
+```
+
+### Defining the implementation class
+```abap
+CLASS zcl_ms_custom_entity DEFINITION
+  PUBLIC
+  FINAL
+  CREATE PUBLIC .
+
+  PUBLIC SECTION.
+    INTERFACES if_rap_query_provider.
+  PROTECTED SECTION.
+  PRIVATE SECTION.
+ENDCLASS.
+
+
+CLASS zcl_ms_custom_entity IMPLEMENTATION.
+
+  METHOD if_rap_query_provider~select.
+    DATA dummy_data TYPE STANDARD TABLE OF ZI_DM_CustomEntity.
+
+    IF io_request->is_data_requested(  ).
+      " TODO: Use following fields to return only requested data
+      DATA(lv_offset) = io_request->get_paging( )->get_offset( ).
+      DATA(lv_page_size) = io_request->get_paging( )->get_page_size( ).
+      DATA(lv_max_rows) = COND #( WHEN lv_page_size = if_rap_query_paging=>page_size_unlimited
+                                THEN 0 ELSE lv_page_size ).
+
+      dummy_data = VALUE #(
+          ( TravelId = 1 AgencyId = 1 CustomerId = 1 BeginDate = '20210901' EndDate = '20211009' FullPrice = 1500 Currency = 'EUR' Status = 'A')
+          ( TravelId = 2 AgencyId = 2 CustomerId = 4 BeginDate = '20230603' EndDate = '20230703' FullPrice = 1800 Currency = 'EUR' Status = 'A')
+          ( TravelId = 3 AgencyId = 1 CustomerId = 2 BeginDate = '20220201' EndDate = '20220309' FullPrice = 1200 Currency = 'USD' Status = 'A') ).
+
+      io_response->set_data( dummy_data ).
+    ENDIF.
+
+    IF io_request->is_total_numb_of_rec_requested(  ).
+      io_response->set_total_number_of_records( iv_total_number_of_records = 5 ).
+    ENDIF.
+  ENDMETHOD.
+
+ENDCLASS.
+```
+
 ## Use of CDS Views in classic ABAP Code
 
 Preconditions for this step:
