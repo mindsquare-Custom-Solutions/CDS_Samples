@@ -75,13 +75,11 @@ define view entity ZI_MS_CustomerName
       FirstName,
       LastName,
       concat_with_space( FirstName, LastName, 1 ) as FullName,
-      cast(
-        case Title
-            when 'Mr.'  then 'M'
-            when 'Mrs.' then 'F'
-            else ''
-        end as zmind2_gender
-      )                                           as Gender,
+      case Title
+          when 'Mr.'  then 'M'
+          when 'Mrs.' then 'F'
+          else ''
+      end                                         as Gender,                                       as Gender,
       Title,
       Street,
       PostalCode,
