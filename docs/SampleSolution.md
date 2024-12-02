@@ -245,7 +245,60 @@ define view entity ZI_MS_BookingSupplementName
 }
 ```
 
+## Consume SQL in ABAP
 
+Changes:
+- Added program ZMS_CDS_ABAPSQL
+
+### Output via output
+```abap
+REPORT zms_cds_abapsql.
+
+SELECT FROM zc_ms_customername
+  FIELDS CustomerId, FullName
+  INTO TABLE @DATA(customername).
+
+cl_demo_output=>display( customername ).
+```
+
+### Output via ALV
+Changes:
+- Added program ZMS_CDS_ABAPSQL_ALV
+
+```abap
+REPORT zms_cds_abapsql_alv.
+
+DATA: customer TYPE ZC_MS_CustomerName.
+
+SELECT-OPTIONS: country FOR customer-CountryCode,
+                gender FOR customer-Gender.
+
+END-OF-SELECTION.
+
+  DATA(alv) = cl_salv_gui_table_ida=>create_for_cds_view(
+        iv_cds_view_name = 'ZC_MS_CustomerName' ).
+
+  DATA(collector) = NEW cl_salv_range_tab_collector( ).
+
+  collector->add_ranges_for_name(
+    iv_name   = 'COUNTRYCODE'
+    it_ranges = country[]
+  ).
+
+  collector->add_ranges_for_name(
+      iv_name = 'GENDER'
+      it_ranges = gender[] ).
+
+  collector->get_collected_ranges(
+    IMPORTING
+      et_named_ranges = DATA(named_ranges)
+  ).
+
+  alv->set_select_options(
+      it_ranges = named_ranges ).
+
+  alv->fullscreen( )->display( ).
+```
 
 ## Associations
 
@@ -382,7 +435,7 @@ define view entity ZC_MS_CustomerName
 @EndUserText.label: 'Composite Interface View for Booking'
 define view entity ZI_MS_BookingCurrency
   with parameters
-    pDesiredCurrency : abap.cuky(5)
+    P_DesiredCurrency : abap.cuky(5)
   as select from ZMIND2E_I_Booking
   association [0..1] to ZI_MS_CustomerName as _CustomerName on $projection.CustomerID = _CustomerName.CustomerId
 {
@@ -403,11 +456,11 @@ define view entity ZI_MS_BookingCurrency
       cast(currency_conversion(
           amount => FlightPrice,
           source_currency => CurrencyCode,
-          target_currency => $parameters.pDesiredCurrency,
+          target_currency => $parameters.P_DesiredCurrency,
           exchange_rate_date => FlightDate
       ) as abap.dec(17,2))                as ConvertedFlightPrice,
 
-      $parameters.pDesiredCurrency        as NewCurrencyCode,
+      $parameters.P_DesiredCurrency        as NewCurrencyCode,
 
       LocalLastChangedAt,
       /* Associations */
@@ -426,15 +479,30 @@ define view entity ZI_MS_BookingCurrency
 
 ### Direct Extensions
 
+#### Defining ZXI_Agency
+
 Preconditions for this step:
 - None
-
-#### Defining ZXI_Agency
 
 ```cds
 extend view entity ZMIND2E_I_Agency with
 {
   zmind2_agency.zz_ext_1 as MyExtensionField
+}
+```
+
+#### Defining ZXI_Customer
+
+Preconditions for this step:
+- Have ZI_Customer defined
+- Annotation "@Metadata.allowExtensions: true" has been added to ZI_Customer
+- Annotation value of "@AbapCatalog.viewEnhancementCategory" in ZI_Customer has been set to "[#PROJECTION_LIST]"
+
+```cds
+extend view entity ZI_MS_Customer with
+{
+  'Extension Value 1' as Extension1,
+  'X'                 as Extension2
 }
 ```
 
@@ -458,7 +526,7 @@ Preconditions for this step:
     dataClass: #MIXED
 }
 define view entity ZC_MS_Booking
-  as select from ZI_MS_BookingCurrency(pDesiredCurrency: 'EUR')
+  as select from ZI_MS_BookingCurrency(P_DesiredCurrency: 'EUR')
   association [0..1] to ZC_MS_Customer as _Customer on $projection.CustomerID = _Customer.CustomerId
 {
   key TravelID,
@@ -523,11 +591,6 @@ define view entity ZC_MS_Customer
 }
 ```
 
-### Service Definitions
-
-Note:
-- For Service Bindings, please look at the slides of the training unit
-
 #### Defining Z_UI_Booking
 
 ```cds
@@ -536,6 +599,18 @@ define service ZUI_MS_Booking {
   expose ZC_MS_Booking;
 }
 ```
+
+### Service Definition
+@EndUserText.label: 'Service Definition for Booking'
+define service ZUI_MS_Booking {
+  expose ZC_MS_Booking  as Booking;
+  expose ZC_MS_Customer as Customer;
+}
+
+### Service Binding
+
+Note:
+- For Service Bindings, please look at the slides of the training unit
 
 ## Annotations
 
